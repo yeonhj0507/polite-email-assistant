@@ -1,0 +1,17 @@
+name: flutter_tray_app
+description: Windows tray app that rewrites Gmail e-mails politely
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  tray_manager: ^0.2.0
+  window_manager: ^0.3.7
+  http: ^0.13.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
