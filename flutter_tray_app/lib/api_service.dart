@@ -35,17 +35,26 @@ String _detectLanguage(String text) =>
 ///  Split GPT response into list  ────────────────
 /// ===============================================
 List<String> _splitSuggestions(String raw) {
+  /* ------------------- 1. JSON 응답 ------------------- */
   try {
     final decoded = jsonDecode(raw);
-    if (decoded is Map && decoded['suggestions'] is List) {
-      return (decoded['suggestions'] as List)
-          .map((e) => e.toString().trim())
+    if (decoded is Map) {
+      final tone = decoded['tone']?.toString().trim();
+      final sugg = (decoded['suggestions'] as List?)
+          ?.map((e) => e.toString().trim())
           .where((s) => s.isNotEmpty)
-          .cast<String>()
           .toList();
-    }
-  } catch (_) {/* pass */}
 
+      if (sugg != null && sugg.isNotEmpty) {
+        return (tone != null && tone.isNotEmpty)
+            ? [tone, ...sugg]   // ★ tone을 0번 인덱스에 삽입
+            : sugg;
+      }
+    }
+  } catch (_) {/* JSON 파싱 실패 → 넘김 */}
+  /* ---------------------------------------------------- */
+
+  /* -------- 2. 번호 매긴 리스트 백업 파싱 -------------- */
   final regex =
       RegExp(r'(?:^|\n)\s*\d+\)\s*(.+?)(?=\n\d+\)|\s*$)', dotAll: true);
   final list = regex
@@ -54,6 +63,7 @@ List<String> _splitSuggestions(String raw) {
       .where((s) => s.isNotEmpty)
       .toList();
 
+  /* 3. 실패 시 전체 raw 반환 */
   return list.isNotEmpty ? list : [raw.trim()];
 }
 
@@ -81,6 +91,10 @@ Future<List<String>> generatePoliteRewrites(EmailRequest req) async {
 Target 문장을 **동일한 의미로** 유지하면서 공손·전문적인 어조로 *재작성*한
 대안 3개를 완성형 문장으로 제시하십시오.
 
+⚠️ 절대 하지 말 것
+- Target 내용에 대해 답변하거나 충고·설명하지 않는다.
+- 규격 외 텍스트나 줄바꿈, 키 추가, 예시 추가를 출력하지 않는다.
+
 규칙
 1. Target의 의미(질문·요청·사실)를 유지하고 단어·정보를 추가·삭제하지 마세요.
 2. "issue": true 또는 false 로 수정 필요 여부를 표시합니다.
@@ -88,6 +102,7 @@ Target 문장을 **동일한 의미로** 유지하면서 공손·전문적인 �
 4. 각 제안은 원본 길이 ±30자 이내, 문장 부호로 끝나는 완전한 문장이어야 합니다.
 5. **‘더 공손하게 말씀해 주세요’** 같은 **지시·설명형 문장을 금지**합니다.
 6. 출력은 반드시 *한 줄 JSON*:
+7. "tone" 필드는 "중립" 또는 "무례" 중 하나로 설정합니다.
 
 예시  
 Target: "너는 이름이 뭐냐?"  
@@ -108,12 +123,17 @@ Input
 Rewrite the Target sentence into **three polite alternatives** that keep its
 exact meaning. Provide *complete sentences* only.
 
+⚠️ Never do this
+- Do NOT answer the Target’s question / request or give advice.
+- Do NOT output anything except the required JSON (no line breaks, notes, or extra keys).
+
 Rules
 1. Preserve the intent (question / request / statement); do NOT add or remove information.
 2. Set "issue": true if rewriting is needed; otherwise false and suggestions = [].
 3. Each suggestion must end with proper punctuation and stay within ±30 characters of the original length.
 4. Do **NOT** output instructions such as "Please ask politely"; only the rewritten sentences.
 5. Return **one-line JSON**.
+6. "tone" should be either "Neutral" or"Rude".
 
 Example  
 Target: "What's your name?"  
