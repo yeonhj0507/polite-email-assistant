@@ -46,3 +46,27 @@ Extension Connected
 ```
 
 This means everything is working correctly!
+
+
+
+## 📦 Dependencies and Licenses
+
+### Flutter Tray App
+
+This project uses the following open-source packages:
+
+- [Flutter](https://flutter.dev) – BSD 3-Clause License  
+- [tray_manager](https://pub.dev/packages/tray_manager) – MIT License  
+- [window_manager](https://pub.dev/packages/window_manager) – MIT License  
+- [http](https://pub.dev/packages/http) – BSD 3-Clause License  
+
+All licenses are permissive and compatible with the MIT License used by this project.
+
+### Chrome Extension
+
+No third-party libraries are used. The extension relies solely on standard web technologies and Chrome APIs.
+
+
+## 📄 License
+
+This project is licensed under the [MIT License](./LICENSE) by Paperclip Team.
