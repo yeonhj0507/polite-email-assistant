@@ -1034,61 +1034,33 @@ function applySuggestion(suggestion) {
   hideExistingIndicator();
   showSuccessToast('표현이 개선되었습니다!');
 }
-
-/* ── 13. 키보드 단축키 설정 (충돌 방지 개선) ─────────────────── */
+/* ── 13. 키보드 단축키 설정 (Chrome Extension Commands 사용) ─────────────── */
 function setupKeyboardShortcuts() {
+  // Chrome Extension Commands API 사용
+  if (chrome?.commands) {
+    chrome.commands.onCommand.addListener((command) => {
+      handleCommand(command);
+    });
+  }
+
+  // 웹페이지 내 키보드 이벤트도 백업으로 유지 (ESC 등)
   const handleKeydown = (e) => {
     // Gmail 작성 창에서만 작동하도록 제한
     const isInCompose = lastTarget && 
                        lastTarget.isContentEditable && 
                        lastTarget.closest('[role="dialog"]');
     
-    if (!isInCompose) return;
-
-    // Ctrl + T: 톤 체크 (Tone check)
-    if (e.ctrlKey && e.key === 't') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (suggestBuf.length > 0) {
-        showSuggestionsPopup();
-      } else {
-        // 분석이 필요한 경우 자동 분석
-        const bodyDiv = lastTarget;
-        const toField = document.querySelector('[aria-label="To"], [aria-label="받는 사람"]');
-        const subjField = document.querySelector('input[name="subjectbox"]');
-        analyzeEmailTone(bodyDiv, toField, subjField);
-      }
-    }
-    // Ctrl + U: 되돌리기 (Undo)
-    else if (e.ctrlKey && e.shiftKey && e.key === 'Z') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (lastTarget && hasRollbackHistory(lastTarget)) {
-        showRollbackPopup(lastTarget);
-      }
-    }
-    // Ctrl + Q: 빠른 되돌리기 (Quick undo - 마지막 변경사항만)
-    else if (e.ctrlKey && e.key === 'q') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (lastTarget && hasRollbackHistory(lastTarget)) {
-        const history = getRollbackHistory(lastTarget);
-        if (history.length > 0) {
-          const lastEntry = history[history.length - 1];
-          applyRollback(lastTarget, lastEntry);
-        }
-      }
-    }
-    // Ctrl + H: 도움말 보기 (Help)
-    else if (e.ctrlKey && e.key === 'h') {
-      e.preventDefault();
-      e.stopPropagation();
-      showShortcutHelp();
-    }
-    // ESC: 모든 UI 숨기기
-    else if (e.key === 'Escape') {
+    // ESC는 웹페이지에서 직접 처리 (Chrome Commands에서 지원 안됨)
+    if (e.key === 'Escape') {
       hideExistingPopup();
       hideExistingIndicator();
+      return;
+    }
+
+    // 다른 단축키는 Chrome Commands에서 처리하므로 여기서는 제거
+    // 하지만 Chrome Commands가 작동하지 않을 경우를 대비한 폴백
+    if (!chrome?.commands) {
+      handleLegacyKeyboardShortcuts(e, isInCompose);
     }
   };
 
@@ -1098,6 +1070,60 @@ function setupKeyboardShortcuts() {
   }
   window._politeKeydownHandler = handleKeydown;
   window.addEventListener('keydown', handleKeydown);
+}
+
+// Chrome Commands API를 통한 명령 처리
+function handleCommand(command) {
+  // Gmail 작성 창에서만 작동하도록 제한
+  const isInCompose = lastTarget && 
+                     lastTarget.isContentEditable && 
+                     lastTarget.closest('[role="dialog"]');
+  
+  if (!isInCompose) return;
+
+  switch (command) {
+    case 'tone-check':
+      handleToneCheck();
+      break;
+    case 'show-rollback':
+      handleShowRollback();
+      break;
+    case 'quick-undo':
+      handleQuickUndo();
+      break;
+    case 'show-help':
+      showShortcutHelp();
+      break;
+  }
+}
+
+// 각 명령에 대한 핸들러 함수들
+function handleToneCheck() {
+  if (suggestBuf.length > 0) {
+    showSuggestionsPopup();
+  } else {
+    // 분석이 필요한 경우 자동 분석
+    const bodyDiv = lastTarget;
+    const toField = document.querySelector('[aria-label="To"], [aria-label="받는 사람"]');
+    const subjField = document.querySelector('input[name="subjectbox"]');
+    analyzeEmailTone(bodyDiv, toField, subjField);
+  }
+}
+
+function handleShowRollback() {
+  if (lastTarget && hasRollbackHistory(lastTarget)) {
+    showRollbackPopup(lastTarget);
+  }
+}
+
+function handleQuickUndo() {
+  if (lastTarget && hasRollbackHistory(lastTarget)) {
+    const history = getRollbackHistory(lastTarget);
+    if (history.length > 0) {
+      const lastEntry = history[history.length - 1];
+      applyRollback(lastTarget, lastEntry);
+    }
+  }
 }
 
 /* ── 단축키 도움말 표시 ─────────────────── */
