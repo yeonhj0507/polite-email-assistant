@@ -1,3 +1,27 @@
+# About Paperclip
+
+## 📱 Application Description
+
+### Paperclip : Tone-Sensitive Writing Assistant for Clear and Culturally-Appropriate Messaging
+
+Paperclip is an AI-powered communication assistant designed to enhance the clarity, politeness, and cultural sensitivity of your messages in real-time. Operating entirely locally on your device, Paperclip ensures maximum data security by eliminating external data transfers, making it ideal for security-sensitive environments.
+
+Leveraging the Qwen2.5-7B-Instruct model optimized with Qualcomm's Genie SDK, Paperclip provides instant tone analysis and context-aware sentence suggestions within one second. It offers at least three refined alternatives per message—polite, neutral-and-direct, and apologetic—to ensure effective communication across diverse cultural contexts, supporting Korean, English, and Japanese languages.
+
+Seamlessly integrated as a desktop editor plug-in or mobile keyboard extension, Paperclip never disrupts your workflow. Its intuitive interface allows quick revision selection via shortcuts, with easy rollback options always available. Whether collaborating globally or navigating complex interpersonal interactions, Paperclip keeps your communications clear, professional, and culturally attuned.
+
+
+
+## 👥 Team Members
+
+**Team Leader:** Euntaek Jeong (05temtxi21@gmail.com)
+
+HoYeon An (ahy051012@gmail.com)
+
+Hyunjung Yeon (yeonhj0507@gmail.com)
+
+SeonHo Yoo (leoyoo2004@korea.ac.kr)
+
 # Project Setup Guide
 
 ## 🧩 Dependencies & Build Instructions
