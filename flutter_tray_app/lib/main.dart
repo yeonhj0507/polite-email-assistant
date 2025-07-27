@@ -9,6 +9,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  await trayManager.setIcon(
+    Platform.isWindows ? 'assets/tray_icon.ico' : 'assets/tray_icon.png',
+  );
+
   // 창을 띄우지 않고 숨김
   await windowManager.hide();
 
